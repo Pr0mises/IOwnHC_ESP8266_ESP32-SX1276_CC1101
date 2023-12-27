@@ -2,14 +2,21 @@
   General utility functions
 */
 
-
 #pragma once
 #include <vector> 
 #include <sstream> 
-#include <TickerUs.h>
 
 
-#define MAXCMDS 15
+#if defined(ESP8266)
+  #include <TickerUs.h>
+#elif defined(ESP32)  	
+  #include <TickerUsESP32.h>
+#endif
+
+//#include <Ticker.h>
+
+
+#define MAXCMDS 25
 
 #if defined(DEBUG)
   #ifndef DEBUG_PORT
@@ -21,7 +28,6 @@
 #endif
 
 
-
 using Tokens = std::vector<std::string>;
 namespace Cmd
 {
@@ -29,12 +35,19 @@ namespace Cmd
   uint8_t __len = 0;
   uint8_t __avail = 0;
 //  bool receivingSerial = false;
-  
-  Timers::TickerUs kbd_tick;
+
+#if defined(ESP8266)
+      Timers::TickerUs kbd_tick;
+#elif defined(ESP32)
+      //Timers::TickerUsESP32 kbd_tick;
+      TickerUsESP32 kbd_tick;
+      //Ticker kbd_tick2;
+#endif
+
 
   struct _cmdEntry{
 
-      char cmd[9];
+      char cmd[15];
       char description[61];
       void (*handler)(Tokens*);
   } *_cmdHandler[MAXCMDS];
@@ -101,38 +114,42 @@ namespace Cmd
       return nullptr;
   }
 
-  void init(void)
-  {
-    kbd_tick.attach_ms(100, [&](void)->void {
-      char *_cmd;
-      const char delim = ' '; 
-      Tokens segments; 
+  void cmdFuncHandler(){
+    char *_cmd;
+    const char delim = ' '; 
+    Tokens segments; 
 
-      _cmd = cmdReceived(true);
-      if (!_cmd) return;
-      if (!strlen(_cmd)) return;
+    _cmd = cmdReceived(true);
+    if (!_cmd) return;
+    if (!strlen(_cmd)) return;
 
-      tokenize(_cmd, delim, segments);
-      if (strcmp((char *)"help", segments[0].c_str()) == 0)
-      {
-        Serial.printf("\nRegistered commands:\n");
-        for (uint8_t idx=0; idx<=lastEntry; ++idx)
-        {
-          if (_cmdHandler[idx] == nullptr) continue;
-          Serial.printf("- %s\t%s\n", _cmdHandler[idx]->cmd, _cmdHandler[idx]->description);
-        }
-        Serial.printf("- %s\t%s\n\n", (char*)"help", (char*)"This command");
-      }
+    tokenize(_cmd, delim, segments);
+    if (strcmp((char *)"help", segments[0].c_str()) == 0)
+    {
+      Serial.printf("\nRegistered commands:\n");
       for (uint8_t idx=0; idx<=lastEntry; ++idx)
       {
         if (_cmdHandler[idx] == nullptr) continue;
-        if (strcmp(_cmdHandler[idx]->cmd, segments[0].c_str()) == 0)
-        {
-          _cmdHandler[idx]->handler(&segments);
-          return;
-        }
+        Serial.printf("- %s\t%s\n", _cmdHandler[idx]->cmd, _cmdHandler[idx]->description);
       }
-      Serial.printf("*> Unknown <*\n");
-    });
+      Serial.printf("- %s\t%s\n\n", (char*)"help", (char*)"This command");
+      Serial.printf("\n");
+      return;
+    }
+    for (uint8_t idx=0; idx<=lastEntry; ++idx)
+    {
+      if (_cmdHandler[idx] == nullptr) continue;
+      if (strcmp(_cmdHandler[idx]->cmd, segments[0].c_str()) == 0)
+      {
+        _cmdHandler[idx]->handler(&segments);
+        return;
+      }
+    }
+    Serial.printf("*> Unknown <*\n");
   }
+
+  void init(void)
+  {
+    kbd_tick.attach_ms(100, cmdFuncHandler);
+  }  
 }
