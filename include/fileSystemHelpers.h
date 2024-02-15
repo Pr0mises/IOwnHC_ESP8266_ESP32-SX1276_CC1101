@@ -8,7 +8,6 @@
     #include <FS.h>
 #endif
 
-
-void listFS(void);
+void listFS();
 void cat(const char *fname);
 void rm(const char *fname);

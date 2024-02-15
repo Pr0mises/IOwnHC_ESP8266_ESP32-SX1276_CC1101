@@ -3,7 +3,6 @@
 #include <CC1101Helpers.h>
 #if defined(CC1101)
 
-
 #include <map>
 #if defined(ESP8266)
     #include <TickerUs.h>
@@ -12,8 +11,7 @@
     #include <esp_task_wdt.h>
 #endif
 
-namespace Radio
-{
+namespace Radio {
 
     SPISettings SpiSettings(SPI_CLK_FRQ, MSBFIRST, SPI_MODE0);
 //    WorkingParams _params;
@@ -37,21 +35,19 @@ namespace Radio
         {250, {0x03, 0x01}}     // 232KHz
     };
 
-    void SPI_beginTransaction(void)
+    void SPI_beginTransaction()
     {
         digitalWrite(RADIO_NSS, LOW);
         SPI.beginTransaction(Radio::SpiSettings);
     }
 
-    void SPI_endTransaction(void)
-    {
+    void SPI_endTransaction(void) {
         SPI.endTransaction();
         digitalWrite(RADIO_NSS, HIGH);
     }
 
-    void initHardware(void)
-    {
-        // NEcesario?
+    void initHardware() {
+        // Necesary?
         pinMode(RADIO_DIO_0, INPUT);
         pinMode(RADIO_DIO_2, INPUT);
 
@@ -101,15 +97,13 @@ namespace Radio
 
     }
 
-
 void SPIwriteRegisterBurst(uint8_t reg, uint8_t* data, size_t len) {
-  SPItransfer(CMD_WRITE, reg | CMD_BURST, data, NULL, len);
+  SPItransfer(CMD_WRITE, reg | CMD_BURST, data, nullptr, len);
 }
 
 void SPIwriteRegister(uint16_t reg, uint8_t data) {
-    SPItransfer(CMD_WRITE, reg, &data, NULL, 1);
+    SPItransfer(CMD_WRITE, reg, &data, nullptr, 1);
 }
-
 
 void SPIsendCommand(uint8_t cmd) {
     SPI_beginTransaction();
@@ -135,12 +129,10 @@ int16_t SPIsetRegValue(uint8_t reg, uint8_t value, uint8_t msb, uint8_t lsb, uin
     return(-11);
   }
 
-
     uint8_t currentValue = SPIreadRegister(reg);
     uint8_t mask = ~((0b11111111 << (msb + 1)) | (0b11111111 >> (8 - lsb)));
     uint8_t newValue = (currentValue & ~mask) | (value & mask);
     SPIwriteRegister(reg, newValue);
-
 
     // check register value each millisecond until check interval is reached
     // some registers need a bit of time to process the change (e.g. SX127X_REG_OP_MODE)
@@ -170,8 +162,6 @@ int16_t SPIsetRegValue(uint8_t reg, uint8_t value, uint8_t msb, uint8_t lsb, uin
 
 }
 
-
-
 int16_t SPIgetRegValue(uint8_t reg, uint8_t msb, uint8_t lsb) {
   // status registers require special command
   if(reg > REG_TEST0) {
@@ -189,13 +179,13 @@ int16_t SPIgetRegValue(uint8_t reg, uint8_t msb, uint8_t lsb) {
 
 uint8_t SPIreadRegister(uint8_t reg) {
     uint8_t resp = 0;
-    SPItransfer(CMD_READ, reg, NULL, &resp, 1);
+    SPItransfer(CMD_READ, reg, nullptr, &resp, 1);
     return(resp);
 }
 
 void SPIreadRegisterBurst(uint8_t reg, uint8_t numBytes, uint8_t* inBytes) {
   //this->mod->SPIreadRegisterBurst(reg | RADIOLIB_CC1101_CMD_BURST, numBytes, inBytes);
-    SPItransfer(CMD_READ, reg|CMD_BURST, NULL, inBytes, numBytes);
+    SPItransfer(CMD_READ, reg|CMD_BURST, nullptr, inBytes, numBytes);
 }
 
 void spiTransfer(uint8_t* out, size_t len, uint8_t* in) {
@@ -208,8 +198,8 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
     // prepare the buffers
     size_t buffLen = (1 + numBytes);
 
-    uint8_t* buffOut = new uint8_t[buffLen];
-    uint8_t* buffIn = new uint8_t[buffLen];
+    auto* buffOut = new uint8_t[buffLen];
+    auto* buffIn = new uint8_t[buffLen];
 
     uint8_t* buffOutPtr = buffOut;
 
@@ -378,8 +368,6 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
 */
     }
 
-    void calibrate(void)
-    {
 /*
         // RC Calibration (only call after setting correct frequency band)
         writeByte(REG_OSC, RF_OSC_RCCALSTART);
@@ -388,17 +376,17 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         // Wait end of calibration
         do {} while (readByte(REG_IMAGECAL) & RF_IMAGECAL_IMAGECAL_RUNNING);
 */
+    void calibrate() {
     }
 
-    void setStandby(void)
-    {
+    void setStandby() {
 /*
         writeByte(REG_OPMODE, (readByte(REG_OPMODE) & RF_OPMODE_MASK) | RF_OPMODE_STANDBY);
 */
     }
 
-    void setTx(void)    // Uncommon and incompatible settings
-    {
+    void setTx() {    // Uncommon and incompatible settings
+
 /*
         // Enabling Sync word - Size must be set to SYNCSIZE_2 (0x01 in header file)
         writeByte(REG_SYNCCONFIG, (readByte(REG_SYNCCONFIG) & RF_SYNCCONFIG_SYNCSIZE_MASK) | RF_SYNCCONFIG_SYNCSIZE_2);
@@ -408,8 +396,7 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
 */
     }
 
-    void setRx(void)
-    {
+    void setRx() {
         setSyncWord(0xFF, 0xB3);                                                // Set SyncWord
         SPIsendCommand(CMD_IDLE);
         SPIsendCommand(CMD_FLUSH_RX | CMD_READ);
@@ -419,49 +406,42 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         SPIsendCommand(CMD_RX);
     }
 
-    void clearBuffer(void)
-    {
+    void clearBuffer() {
         SPIsendCommand(CMD_FLUSH_RX | CMD_READ);
     }
 
-    void clearFlags(void)
-    {
+    void clearFlags() {
 /*
         uint8_t out[2] = {0xff, 0xff};
         writeBytes(REG_IRQFLAGS1, out, 2);
 */
     }
 
-    bool preambleDetected(void)
-    {
+    bool preambleDetected() {
 /*
         return (readByte(REG_IRQFLAGS1) & RF_IRQFLAGS1_PREAMBLEDETECT);
 */
         return(0);
     }
 
-    bool syncedAddress(void)
-    {
+    bool syncedAddress() {
 /*
         return (readByte(REG_IRQFLAGS1) & RF_IRQFLAGS1_SYNCADDRESSMATCH);
 */
         return(0);
     }
 
-    bool dataAvail(void)
-    {
+    bool dataAvail() {
 /*
         return ((readByte(REG_IRQFLAGS2) & RF_IRQFLAGS2_FIFOEMPTY)?false:true); // Check if FIFO is Empty in RX
 */
         uint8_t bytesInFIFO = SPIgetRegValue(REG_RXBYTES, 6, 0);
         if (bytesInFIFO == 0)
             return(false);
-        else
-            return(true);
+        return(true);
     }
 
-    uint8_t readRegValue(uint8_t regAddr)
-    {
+    uint8_t readRegValue(uint8_t regAddr) {
         uint8_t getByte;
 
         if(regAddr > REG_TEST0) {
@@ -473,8 +453,7 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         return (getByte);
     }
 
-    uint8_t readByte(uint8_t regAddr)
-    {
+    uint8_t readByte(uint8_t regAddr) {
         uint8_t getByte;
 
         readBytes(regAddr, &getByte, 1);
@@ -482,40 +461,33 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         return (getByte);
     }
 
-    void readBytes(uint8_t regAddr, uint8_t *out, uint8_t len)
-    {
+    void readBytes(uint8_t regAddr, uint8_t *out, uint8_t len) {
         SPI_beginTransaction();
         SPI.transfer(regAddr);                  // Send Address
         for (uint8_t idx=0; idx < len; ++idx)
             out[idx] = SPI.transfer(regAddr);   // Get data
         SPI_endTransaction();
 
-        return;
     }
 
-    void writeCMD(uint8_t CMDAddr)
-    {
+    void writeCMD(uint8_t CMDAddr) {
         SPI_beginTransaction();
         SPI.transfer(CMDAddr);
         SPI_endTransaction();
-        return;
     }
 
-    bool writeByte(uint8_t regAddr, uint8_t data, bool check)
-    {
+    bool writeByte(uint8_t regAddr, uint8_t data, bool check) {
         return writeBytes(regAddr, &data, 1, check);
     }
 
-    bool writeBytes(uint8_t regAddr, uint8_t *in, uint8_t len, bool check)
-    {
+    bool writeBytes(uint8_t regAddr, uint8_t *in, uint8_t len, bool check) {
         SPI_beginTransaction();
         SPI.write(regAddr | SPI_Write);      // Send Address with Write flag
         for (uint8_t idx=0; idx < len; ++idx)
             SPI.write(in[idx]);              // Send data
         SPI_endTransaction();
 
-        if (check)
-        {
+        if (check) {
             uint8_t getByte;
 
             SPI_beginTransaction();
@@ -535,16 +507,14 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         return true;
     }
 
-    bool inStdbyOrSleep(void)
-    {
+    bool inStdbyOrSleep() {
         uint8_t data = SPIgetRegValue(REG_MARCSTATE,4,0);        
         if ((data == RF_MARC_STATE_SLEEP) || (data == RF_MARC_STATE_IDLE))
             return true;
         return false;
     }
 
-    bool setCarrier(Carrier param, uint32_t value)
-    {
+    bool setCarrier(Carrier param, uint32_t value) {
         uint32_t tmpVal;
         uint32_t base = 1;
         //uint8_t out[4];
@@ -558,8 +528,7 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
             if (param != Carrier::Frequency)
                 return false;
 
-        switch (param)
-        {
+        switch (param) {
             case Carrier::Frequency:
                 // set mode to standby
                 SPIsendCommand(CMD_IDLE);
@@ -586,8 +555,7 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
                 SPIsetRegValue(REG_DEVIATN, m, 2, 0);
                 break;
             case Carrier::Modulation:
-                switch (value)
-                {
+                switch (value) {
                     case Modulation::FSK:
                         writeByte(REG_MDMCFG2, 0x02);   //Include DC Filter (Off) - Modulation (2-FSK) - Manchester Enc (Off) - Sync Word Mode (16bits)
                         break;
@@ -608,22 +576,19 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         return true;
     }
 
-    regBandWidth bwRegs(uint8_t bandwidth)
-    {
-        for (auto it = __bw.begin(); it != __bw.end(); it++)
-            if (it->first == bandwidth)
-                return it->second;
+    regBandWidth bwRegs(uint8_t bandwidth) {
+        for (auto & it : __bw)
+            if (it.first == bandwidth)
+                return it.second;
 
         return __bw.rbegin()->second;
     }
 
-    void dump()
-    {
+    void dump() {
         uint8_t idx = 0x00;
 
         Serial.printf("*********************** Radio registers ***********************\n");
-        do       
-        {
+        do {
             Serial.printf("*%2.2x=%2.2x\t", idx, SPIgetRegValue(idx)); idx += 1;
             Serial.printf("*%2.2x=%2.2x\t", idx, SPIgetRegValue(idx)); idx += 1;
             Serial.printf("*%2.2x=%2.2x\t", idx, SPIgetRegValue(idx)); idx += 1;
@@ -639,8 +604,7 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         Serial.printf("\n");
     }
 
-    void dump2()
-    {
+    void dump2() {
         Serial.printf("*********************** Radio registers ***********************\n");
         for (uint8_t a=0; a<=0x3F; a++)
             Serial.printf("%X;%2.2X\n", a,  SPIgetRegValue(a));
@@ -648,7 +612,7 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         Serial.printf("\n");
     }
 
-    uint8_t reverseByte(const uint8_t a){
+    uint8_t reverseByte(const uint8_t a) {
         uint8_t v = a;
         v = ((v >> 1) & 0x55555555) | ((v & 0x55555555) << 1);
         v = ((v >> 2) & 0x33333333) | ((v & 0x33333333) << 2);
@@ -682,9 +646,8 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         }
     }
 
-    int16_t decodeFrame(uint8_t* data, uint8_t lenSrc, uint8_t lenDecoded){
+    int16_t decodeFrame(uint8_t* data, uint8_t lenSrc, uint8_t lenDecoded) {
         byte TmpArray[64];
-        uint8_t byteDecoded;
 
         uint8_t shiftbits=4;
         uint8_t indice=0;
@@ -693,8 +656,8 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         if (lenSrc>64 || lenSrc<10)
             return (-1);
 
-        while (indice < lenDecoded){
-            byteDecoded = ((data[a]<<shiftbits) | (data[a+1]>>(8-shiftbits)));
+        while (indice < lenDecoded) {
+            uint8_t byteDecoded = ((data[a] << shiftbits) | (data[a + 1] >> (8 - shiftbits)));
             shiftbits+=2;
             if (shiftbits==8){
                 shiftbits=0;
@@ -716,7 +679,7 @@ void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, si
         return(lenDecoded);
     }
 
-    void sendFrame(uint8_t* data, uint8_t lenFrame){
+    void sendFrame(uint8_t* data, uint8_t lenFrame) {
         for (uint8_t a=0; a<lenFrame; a++)
             Serial.printf("%2.2X ", data[a]);
         Serial.println();    

@@ -103,7 +103,7 @@ void system_timer_reinit();
 
 
     protected:
-    esp_timer_handle_t _timer;
+    esp_timer_handle_t _timer{};
     };
 //}
 

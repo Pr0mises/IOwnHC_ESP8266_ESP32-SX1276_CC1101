@@ -1,6 +1,5 @@
 /*!
  * \file      sx1276Regs-Fsk.h
- *
  * \brief     SX1276 FSK modem registers and bits definitions
  *
  * \copyright Revised BSD License, see section \ref LICENSE.

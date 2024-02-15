@@ -12,15 +12,12 @@
     #include <vector> 
 #endif
 
-
 #define CRC_POLYNOMIAL_CCITT    0x8408
 
-
-uint8_t hexStringToBytes(const std::string hexString, uint8_t *byteString);
+uint8_t hexStringToBytes(std::string hexString, uint8_t *byteString);
 std::string bytesToHexString(const uint8_t *byteString, uint8_t len);
 
-namespace iohcUtils
-{
+namespace iohcUtils {
     uint16_t computeCrc(uint8_t data, uint16_t crc);
     uint16_t radioPacketComputeCrc(uint8_t *buffer, uint8_t bufferLength);
     uint16_t radioPacketComputeCrc(std::vector<uint8_t>& buffer);

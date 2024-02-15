@@ -2,26 +2,22 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 
+#include <utility>
 
-namespace IOHC
-{
+namespace IOHC {
     iohcSystemTable *iohcSystemTable::_iohcSystemTable = nullptr;
 
-
-    iohcSystemTable::iohcSystemTable()
-    {
+    iohcSystemTable::iohcSystemTable() {
         load();
     }
 
-    iohcSystemTable *iohcSystemTable::getInstance()
-    {
+    iohcSystemTable *iohcSystemTable::getInstance() {
         if (!_iohcSystemTable)
             _iohcSystemTable = new iohcSystemTable();
         return _iohcSystemTable;
     }
 
-    bool iohcSystemTable::addObject(address node, address backbone, uint8_t actuator[2], uint8_t manufacturer, uint8_t flags)
-    {
+    bool iohcSystemTable::addObject(address node, address backbone, uint8_t actuator[2], uint8_t manufacturer, uint8_t flags) {
         changed = true;
         std::string s0 = bytesToHexString(node, 3);
         iohcObject *tmp;
@@ -32,8 +28,7 @@ namespace IOHC
         return(inserted);
     }
 
-    bool iohcSystemTable::addObject(iohcObject *obj)
-    {
+    bool iohcSystemTable::addObject(iohcObject *obj) {
         changed = true;
         std::string s0 = bytesToHexString((uint8_t *)obj->getNode(), 3);
         bool inserted = _objects.insert_or_assign(s0, obj).second;
@@ -41,47 +36,39 @@ namespace IOHC
         return(inserted);
     }
 
-    bool iohcSystemTable::addObject(std::string node_id, std::string serialized)
-    {
+    bool iohcSystemTable::addObject(std::string node_id, std::string serialized) {
         iohcObject *tmp;
-        tmp = new iohcObject (serialized); 
+        tmp = new iohcObject (std::move(serialized));
         bool inserted = _objects.insert_or_assign(node_id, tmp).second;
         save();
         return(inserted);
     }
 
-    bool iohcSystemTable::empty(void)
-    {
+    bool iohcSystemTable::empty() {
         return(_objects.empty());
     }
 
-    uint8_t iohcSystemTable::size(void)
-    {
+    uint8_t iohcSystemTable::size() {
         return(_objects.size());
     }
 
-    void iohcSystemTable::clear(void)
-    {
+    void iohcSystemTable::clear() {
         return(_objects.clear());
     }
 
-    inline iohcSystemTable::Objects::iterator iohcSystemTable::begin(void)
-    {
+    inline iohcSystemTable::Objects::iterator iohcSystemTable::begin() {
         return(_objects.begin());
     }
 
-    inline iohcSystemTable::Objects::iterator iohcSystemTable::end(void)
-    {
+    inline iohcSystemTable::Objects::iterator iohcSystemTable::end() {
         return(_objects.end());
     }
 
-    bool iohcSystemTable::load(void)
-    {
+    bool iohcSystemTable::load() {
         this->empty();
         if (LittleFS.exists(IOHC_SYS_TABLE))
             Serial.printf("Loading systable objects from %s\n", IOHC_SYS_TABLE);
-        else
-        {
+        else {
             Serial.printf("*systable objects not available\n");
             return false;
         }
@@ -92,8 +79,7 @@ namespace IOHC
         f.close();
 
         // Iterate through the JSON object
-        for (JsonPair kv : doc.as<JsonObject>())
-        {
+        for (JsonPair kv : doc.as<JsonObject>()) {
             const char* key = kv.key().c_str();
             JsonObject obj = kv.value().as<JsonObject>();
             for (JsonPair ov : obj)
@@ -102,16 +88,14 @@ namespace IOHC
         return true;
     }
 
-    bool iohcSystemTable::save(bool force)
-    {
+    bool iohcSystemTable::save(bool force) {
         if (!changed && force == false)
             return false;
 
         fs::File f = LittleFS.open(IOHC_SYS_TABLE, "w+");
         DynamicJsonDocument doc(2048);
 
-        for (auto obj : _objects)
-        {
+        for (auto obj : _objects) {
             JsonObject jobj = doc.createNestedObject(obj.first);
             jobj["values"]=obj.second->serialize();
         }
@@ -122,8 +106,7 @@ namespace IOHC
         return true;
     }
 
-    void iohcSystemTable::dump(void)
-    {
+    void iohcSystemTable::dump() {
         Serial.printf("********************** sysTable objects ***********************\n");
         for (auto entry : _objects)
             entry.second->dump();

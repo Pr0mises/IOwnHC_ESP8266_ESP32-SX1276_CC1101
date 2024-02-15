@@ -33,7 +33,6 @@
 #include <iohcRemote1W.h>
 #include <fileSystemHelpers.h>
 
-
 const char* http_username = HTTP_USERNAME;
 const char* http_password = HTTP_PASSWORD;
 WiFiManager wm;
@@ -42,11 +41,10 @@ AsyncWebServer server(HTTP_LISTEN_PORT);
 AsyncWebSocket ws("/ws"); // access at ws://[esp ip]/ws
 AsyncEventSource events("/events"); // event source (Server-Sent events)
 
-
 // Receiving buffer
 bool verbosity = true;
 void txUserBuffer(Tokens*cmd);
-void testKey(void);
+void testKey();
 uint8_t keyCap[16] = {0};
 uint8_t source_originator[3] = {0};
 
@@ -65,8 +63,7 @@ uint32_t frequencies[MAX_FREQS] = FREQS2SCAN;
 
 bool msgRcvd(IOHC::iohcPacket *iohc);
 bool msgArchive(IOHC::iohcPacket *iohc);
-void discovery(void);
-
+void discovery();
 
 void setup() {
 //    Timers::init_us();
@@ -74,11 +71,9 @@ void setup() {
 #if defined(ESP8266)
     INIT_US;
 #endif
-    
 
     Serial.begin(SERIALSPEED);
 //    LOG(printf_P, PSTR("\n\nsetup: free heap  : %d\n"), ESP.getFreeHeap());
-
 
     pinMode(RX_LED, OUTPUT); // we are goning to blink this LED
     digitalWrite( RX_LED, true);
@@ -241,7 +236,6 @@ void setup() {
     Cmd::addHandler((char *)"vent", (char *)"1W vent device", [](Tokens*cmd)->void {remote1W->cmd(IOHC::RemoteButton::Vent);});
     Cmd::addHandler((char *)"force", (char *)"1W force device open", [](Tokens*cmd)->void {remote1W->cmd(IOHC::RemoteButton::ForceOpen);});
 
-
     radioInstance->start(MAX_FREQS, frequencies, 0, msgArchive, msgRcvd);
     relTime = millis();
 
@@ -260,7 +254,6 @@ void loop() {
     MDNS.update();
 #endif
 
-    return;
 /*
 
     if(shouldReboot){
@@ -274,11 +267,9 @@ void loop() {
 */
 }
 
-bool msgRcvd(IOHC::iohcPacket *iohc)
-{
+bool msgRcvd(IOHC::iohcPacket *iohc) {
     unsigned char _dir;
-    if ((iohc->millis - relTime) > 3000)
-    {
+    if ((iohc->millis - relTime) > 3000) {
         Serial.printf("\n");
         relTime = iohc->millis;
         for (uint8_t i=0; i<3; i++)
@@ -290,8 +281,7 @@ bool msgRcvd(IOHC::iohcPacket *iohc)
         _dir = '<';
 
 
-    if (verbosity)
-    {
+    if (verbosity) {
         Serial.printf("Len: %2.2u, mode: %1xW, first: %s, last: %s,", iohc->payload.packet.header.framelength, iohc->payload.packet.header.mode?1:2, iohc->payload.packet.header.first?"T":"F", iohc->payload.packet.header.last?"T":"F");
         Serial.printf(" b: %u, r: %u, lp: %u, ack: %u, prt: %u", iohc->payload.packet.header.use_beacon, iohc->payload.packet.header.routed, iohc->payload.packet.header.low_p, iohc->payload.packet.header.ack, iohc->payload.packet.header.prot_v);
         Serial.printf(" from: %2.2x%2.2x%2.2x, to: %2.2x%2.2x%2.2x, cmd: %2.2x, fr: %6.3fM, s+%5.3f",
@@ -306,40 +296,35 @@ bool msgRcvd(IOHC::iohcPacket *iohc)
 
 /*
 */
-    if (verbosity)
-    {
-        switch (iohc->payload.packet.header.cmd)
-        {
-            case 0x2b:
-            {
+    if (verbosity) {
+        switch (iohc->payload.packet.header.cmd) {
+            case 0x2b:  {
                 sysTable->addObject(iohc->payload.packet.header.source, iohc->payload.packet.msg.p0x2b.backbone,
                     iohc->payload.packet.msg.p0x2b.actuator, iohc->payload.packet.msg.p0x2b.manufacturer, iohc->payload.packet.msg.p0x2b.info);
                 break;
             }
 
-            case 0x30:
-            {
+            case 0x30: {
                 for (uint8_t idx=0; idx < 16; idx ++)
                     keyCap[idx] = iohc->payload.packet.msg.p0x30.enc_key[idx];
 
                 iohcUtils::encrypt_1W_key((const uint8_t *)iohc->payload.packet.header.source, (uint8_t *)keyCap);
                 Serial.printf("Controller key in clear: ");
-                for (uint8_t idx=0; idx < 16; idx ++)
-                    Serial.printf("%2.2x", keyCap[idx]);
+                for (unsigned char idx : keyCap)
+                    Serial.printf("%2.2x", idx);
                 Serial.printf("\n");
                 break;
             }
             
-            case 0x39:
-            {
+            case 0x39: {
                 if (keyCap[0] == 0)
                     break;
                 uint8_t hmac[6];
                 std::vector<uint8_t> frame(&iohc->payload.packet.header.cmd, &iohc->payload.packet.header.cmd+2);
                 iohcUtils::create_1W_hmac(hmac, iohc->payload.packet.msg.p0x39.sequence, keyCap, frame);
                 Serial.printf("hmac: ");
-                for (uint8_t idx=0; idx < 6; idx ++)
-                    Serial.printf("%2.2x", hmac[idx]);
+                for (unsigned char idx : hmac)
+                    Serial.printf("%2.2x", idx);
                 Serial.printf("\n");
                 break;
             }
@@ -350,11 +335,9 @@ bool msgRcvd(IOHC::iohcPacket *iohc)
     return true;
 }
 
-bool msgArchive(IOHC::iohcPacket *iohc)
-{
+bool msgArchive(IOHC::iohcPacket *iohc) {
     radioPackets[nextPacket] = (IOHC::iohcPacket *)malloc(sizeof(IOHC::iohcPacket));
-    if (!radioPackets[nextPacket])
-    {
+    if (!radioPackets[nextPacket]) {
         Serial.printf("*** Malloc failed!\n");
         return false;
     }
@@ -369,8 +352,7 @@ bool msgArchive(IOHC::iohcPacket *iohc)
 
     nextPacket += 1;
     Serial.printf("-> %d\r", nextPacket);
-    if (nextPacket >= IOHC_INBOUND_MAX_PACKETS)
-    {
+    if (nextPacket >= IOHC_INBOUND_MAX_PACKETS) {
         nextPacket = IOHC_INBOUND_MAX_PACKETS -1;
         Serial.printf("*** Not enough buffers available. Please erase current ones\n");
         return false;
@@ -379,15 +361,12 @@ bool msgArchive(IOHC::iohcPacket *iohc)
     return true;
 }
 
-void txUserBuffer(Tokens*cmd)
-{
-    if (cmd->size() < 2)
-    {
+void txUserBuffer(Tokens*cmd) {
+    if (cmd->size() < 2) {
         Serial.printf("No packet to be sent!\n");
         return;
     }
-    else
-    {
+
         if (!packets2send[0])
             packets2send[0] = (IOHC::iohcPacket *)malloc(sizeof(IOHC::iohcPacket));
 
@@ -408,11 +387,10 @@ void txUserBuffer(Tokens*cmd)
         // Do not deallocate buffers as send is asynchronous
 //        free(packets2send[0]);
 //        packets2send[0] = nullptr;
-    }
+
 }
 
-void discovery()
-{
+void discovery() {
     if (!packets2send[0])
         packets2send[0] = (IOHC::iohcPacket *)malloc(sizeof(IOHC::iohcPacket));
 
@@ -434,8 +412,7 @@ void discovery()
     radioInstance->send(packets2send);
 }
 
-void testKey()
-{
+void testKey() {
     std::string controller_key = "d94a00399a46b5aba67f3809b68ecc52";    // In clear
     std::string node_address = "8ad42e";
     std::string dest_address = "00003f";
@@ -446,7 +423,6 @@ void testKey()
     uint8_t bdest[3];
     uint8_t bseq[2] = {0x1a, 0x40}; // <-- Set Sequance number here
     uint8_t output[16];
-
 
     hexStringToBytes(controller_key, bcontroller);
     hexStringToBytes(node_address, bnode);
@@ -461,18 +437,17 @@ void testKey()
     crc = iohcUtils::radioPacketComputeCrc(buffer);
     Serial.printf("--> alt crc %2.2x%2.2x <--\n\n", crc&0x00ff, crc>>8);
 
-
     Serial.printf("Node address: ");
-    for (uint8_t idx=0; idx < 3; idx ++)
-        Serial.printf("%2.2x", bnode[idx]);
+    for (unsigned char idx : bnode)
+        Serial.printf("%2.2x", idx);
     Serial.printf("\n");
     Serial.printf("Dest address: ");
-    for (uint8_t idx=0; idx < 3; idx ++)
-        Serial.printf("%2.2x", bdest[idx]);
+    for (unsigned char idx : bdest)
+        Serial.printf("%2.2x", idx);
     Serial.printf("\n");
     Serial.printf("Controller key in clear:  ");
-    for (uint8_t idx=0; idx < sizeof(bcontroller); idx ++)
-        Serial.printf("%2.2x", bcontroller[idx]);
+    for (unsigned char idx : bcontroller)
+        Serial.printf("%2.2x", idx);
     Serial.printf("\n");
 
     std::vector<uint8_t> node(bnode, bnode+3);
@@ -481,15 +456,14 @@ void testKey()
 
     iohcUtils::encrypt_1W_key(bnode, bcontroller);
     Serial.printf("Controller key encrypted: ");
-    for (uint8_t idx=0; idx < 16; idx ++)
-        Serial.printf("%2.2x", bcontroller[idx]);
+    for (unsigned char idx : bcontroller)
+        Serial.printf("%2.2x", idx);
     Serial.printf("\n");
 
 
     uint16_t test = (bseq[0]<<8)+bseq[1];
     
-    for (uint8_t i=0; i<0x20; i++)
-    {
+    for (uint8_t i=0; i<0x20; i++) {
         test += 1;
         bseq[1] = test & 0x00ff;
         bseq[0] = test >> 8;
@@ -510,14 +484,14 @@ Main parameter:
         iohcUtils::create_1W_hmac(output, bseq, bcontroller, frame1);
 
         Serial.printf("Open: f620");
-        for (uint8_t idx=0; idx < 3; idx ++)
-            Serial.printf("%2.2x", bdest[idx]);
-        for (uint8_t idx=0; idx < 3; idx ++)
-            Serial.printf("%2.2x", bnode[idx]);
-        for (uint8_t idx=0; idx < 7; idx ++) // <-- adjust packet length
-            Serial.printf("%2.2x", bframe1[idx]);
-        for (uint8_t idx=0; idx < 2; idx ++)
-            Serial.printf("%2.2x", bseq[idx]);
+        for (unsigned char idx : bdest)
+            Serial.printf("%2.2x", idx);
+        for (unsigned char idx : bnode)
+            Serial.printf("%2.2x", idx);
+        for (unsigned char idx : bframe1) // <-- adjust packet length
+            Serial.printf("%2.2x", idx);
+        for (unsigned char idx : bseq)
+            Serial.printf("%2.2x", idx);
         for (uint8_t idx=0; idx < 6; idx ++)
             Serial.printf("%2.2x", output[idx]);
         Serial.printf("\t\t");
@@ -528,14 +502,14 @@ Main parameter:
         iohcUtils::create_1W_hmac(output, bseq, bcontroller, frame2);
 
         Serial.printf("Close: f620");
-        for (uint8_t idx=0; idx < 3; idx ++)
-            Serial.printf("%2.2x", bdest[idx]);
-        for (uint8_t idx=0; idx < 3; idx ++)
-            Serial.printf("%2.2x", bnode[idx]);
-        for (uint8_t idx=0; idx < 7; idx ++) // <-- adjust packet length
-            Serial.printf("%2.2x", bframe2[idx]);
-        for (uint8_t idx=0; idx < 2; idx ++)
-            Serial.printf("%2.2x", bseq[idx]);
+        for (unsigned char idx : bdest)
+            Serial.printf("%2.2x", idx);
+        for (unsigned char idx : bnode)
+            Serial.printf("%2.2x", idx);
+        for (unsigned char idx : bframe2) // <-- adjust packet length
+            Serial.printf("%2.2x", idx);
+        for (unsigned char idx : bseq)
+            Serial.printf("%2.2x", idx);
         for (uint8_t idx=0; idx < 6; idx ++)
             Serial.printf("%2.2x", output[idx]);
         Serial.printf("\n");

@@ -3,7 +3,6 @@
 #include <SX1276Helpers.h>
 #if defined(SX1276)
 
-
 #include <map>
 #if defined(ESP8266)
     #include <TickerUs.h>
@@ -12,8 +11,7 @@
     #include <esp_task_wdt.h>
 #endif
 
-namespace Radio
-{
+namespace Radio {
     SPISettings SpiSettings(SPI_CLOCK_DIV2, MSBFIRST, SPI_MODE0);
 //    WorkingParams _params;
 

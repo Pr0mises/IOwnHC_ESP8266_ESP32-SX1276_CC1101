@@ -1,21 +1,24 @@
 
-//flag to use from web update to reboot the ESP
-bool shouldReboot = false;
+#ifndef WEBSERVERHELPERS_H
+#define WEBSERVERHELPERS_H
 
-void onRequest(AsyncWebServerRequest *request){
+//flag to use from web update to reboot the ESP
+inline bool shouldReboot = false;
+
+inline void onRequest(AsyncWebServerRequest *request){
   //Handle Unknown Request
   request->send(404);
 }
 
-void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+inline void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
   //Handle body
 }
 
-void onUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+inline void onUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
   //Handle upload
 }
 
-void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
+inline void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
   //Handle WebSocket event
 }
 
@@ -26,7 +29,7 @@ void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
 void testmDNS (char *qs)
 {
   Serial.println("Sending mDNS query");
-  //int n = MDNS.queryService(qs, "tcp");  // Send out query for esp tcp services  
+  //int n = MDNS.queryService(qs, "tcp");  // Send out query for esp tcp services
   int n = MDNS.queryService((const char*) qs, "tcp");  // Send out query for esp tcp services   IS VALID?
   Serial.println("mDNS query done");
   if (n == 0) {
@@ -48,3 +51,4 @@ void testmDNS (char *qs)
   }
   Serial.println();
 }
+#endif // WEBSERVERHELPERS_H

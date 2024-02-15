@@ -5,9 +5,7 @@
 #include <iohcRadio.h>
 #include <vector> 
 
-
 #define IOHC_1W_REMOTE  "/1W.json"
-
 
 /*
     Singleton class with a full implementation of a VELUX KLIxxx controller
@@ -15,8 +13,7 @@
     Type can be multiple, as it would be for KLI310, KLI312 and KLI313
     Also, the address and private key can be configured within the same json file.
 */
-namespace IOHC
-{
+namespace IOHC {
     enum class RemoteButton {
         Pair,
         Add,
@@ -28,28 +25,27 @@ namespace IOHC
         ForceOpen
     };
 
-    class iohcRemote1W
-    {
+    class iohcRemote1W {
         public:
             static iohcRemote1W *getInstance();
-            virtual ~iohcRemote1W() {};
+            virtual ~iohcRemote1W() = default;
 
             void cmd(RemoteButton cmd);
 
         private:
             iohcRemote1W();
             static iohcRemote1W *_iohcRemote1W;
-            bool load(void);
-            bool save(void);
+            bool load();
+            bool save();
 
         protected:
-            address _node;
-            uint16_t _sequence;
-            uint8_t _key[16];
+            address _node{};
+            uint16_t _sequence{};
+            uint8_t _key[16]{};
             std::vector<uint16_t> _type;
-            uint8_t _manufacturer;
+            uint8_t _manufacturer{};
 
-            IOHC::iohcPacket *packets2send[25];
-            IOHC::iohcRadio *_radioInstance;
+            IOHC::iohcPacket *packets2send[25]{};
+            IOHC::iohcRadio *_radioInstance{};
     };
 }

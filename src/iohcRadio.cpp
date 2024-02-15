@@ -1,8 +1,8 @@
 #include <iohcRadio.h>
 
+#include <utility>
 
-namespace IOHC
-{
+namespace IOHC {
     iohcRadio *iohcRadio::_iohcRadio = nullptr;
     volatile bool iohcRadio::__g_preamble = false;
     volatile bool iohcRadio::__g_payload = false;
@@ -13,8 +13,7 @@ namespace IOHC
     volatile bool iohcRadio::txMode = false;
 
 
-    iohcRadio::iohcRadio()
-    {
+    iohcRadio::iohcRadio() {
         Radio::initHardware();
         Radio::initRegisters(MAX_FRAME_LEN);
         Radio::setCarrier(Radio::Carrier::Deviation, 19200);
@@ -41,31 +40,27 @@ namespace IOHC
 #endif
     }
 
-    iohcRadio *iohcRadio::getInstance()
-    {
+    iohcRadio *iohcRadio::getInstance() {
         if (!_iohcRadio)
             _iohcRadio = new iohcRadio();
         return _iohcRadio;
     }
 
-    void iohcRadio::start(uint8_t num_freqs, uint32_t *scan_freqs, uint32_t scanTimeUs, IohcPacketDelegate rxCallback = nullptr, IohcPacketDelegate txCallback = nullptr)
-    {
+    void iohcRadio::start(uint8_t num_freqs, uint32_t *scan_freqs, uint32_t scanTimeUs, IohcPacketDelegate rxCallback = nullptr, IohcPacketDelegate txCallback = nullptr) {
         this->num_freqs = num_freqs;
         this->scan_freqs = scan_freqs;
         this->scanTimeUs = scanTimeUs?scanTimeUs:DEFAULT_SCAN_INTERVAL_US;
-        this->rxCB = rxCallback;
-        this->txCB = txCallback;
+        this->rxCB = std::move(rxCallback);
+        this->txCB = std::move(txCallback);
 
         Radio::clearBuffer();
         Radio::clearFlags();
         Radio::setCarrier(Radio::Carrier::Frequency, 868950000);
         Radio::calibrate();
         Radio::setRx();
-
     }
 
-    void iohcRadio::tickerCounter(iohcRadio *radio)
-    {
+    void iohcRadio::tickerCounter(iohcRadio *radio) {
 #if defined(SX1276)
         Radio::readBytes(REG_IRQFLAGS1, __flags, sizeof(__flags));
 
@@ -137,15 +132,12 @@ namespace IOHC
 
     }
 
-    void iohcRadio::send(IOHC::iohcPacket *iohcTx[])
-    {
+    void iohcRadio::send(IOHC::iohcPacket *iohcTx[]) {
         uint8_t idx = 0;
 
         if (txMode)
             return;
-
-        do
-        {
+        do {
             packets2send[idx] = iohcTx[idx];
         } while (iohcTx[idx++]);
 
@@ -153,9 +145,8 @@ namespace IOHC
         Sender.attach_ms(packets2send[txCounter]->millis, packetSender, this);
     }
 
-    void iohcRadio::packetSender(iohcRadio *radio)
-    {
-Serial.println("packetSender");
+    void iohcRadio::packetSender(iohcRadio *radio)  {
+        Serial.println("packetSender");
         f_lock = true;  // Stop frequency hopping
         txMode = true;  // Avoid Radio put in Rx mode at next packet sent/received
 
@@ -185,20 +176,17 @@ Serial.println("packetSender");
 
         if (radio->iohc->repeat)
             radio->iohc->repeat -= 1;
-        if (radio->iohc->repeat == 0)
-        {
+        if (radio->iohc->repeat == 0)  {
             radio->Sender.detach();
             if (radio->packets2send[++(radio->txCounter)])
                 radio->Sender.attach_ms(radio->packets2send[radio->txCounter]->millis, radio->packetSender, radio);
-            else
-            {
+            else {
                 txMode = false;     // In any case, after last packet sent, unlock the radio
             }
         }
     }
 
-    bool iohcRadio::sent(IOHC::iohcPacket *packet)
-    {
+    bool iohcRadio::sent(IOHC::iohcPacket *packet) {
         bool ret = false;
 
         if (txCB)
@@ -206,8 +194,7 @@ Serial.println("packetSender");
         return ret;
     }
 
-    bool iohcRadio::receive()
-    {
+    bool iohcRadio::receive() {
         bool frmErr=false;
         iohc = (IOHC::iohcPacket *)malloc(sizeof(IOHC::iohcPacket));
         iohc->buffer_length = 0;
@@ -228,7 +215,6 @@ Serial.println("packetSender");
         size_t readBytes = 0;
         uint32_t lastPop = millis();
 #endif
-
 
 #if defined(SX1276)
         while (!Radio::dataAvail())
@@ -272,7 +258,6 @@ Serial.println("packetSender");
             // Get how many bytes are left in FIFO.
             bytesInFIFO = Radio::SPIgetRegValue(REG_RXBYTES, 6, 0);
         }
-
 
         frmErr=true;
         if (lenghtFrameCoded<255){

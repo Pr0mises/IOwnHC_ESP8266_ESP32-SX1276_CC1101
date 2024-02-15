@@ -1,6 +1,5 @@
 #include <fileSystemHelpers.h>
 
-
 void printFileInfo(const char* dirName, const char* filePath, uint8_t level) {
   File file = LittleFS.open((String(dirName) + String(filePath)).c_str(), "r");
   if (!file.isDirectory()) {
@@ -49,15 +48,12 @@ void traverseDirectory(const char* dirName, uint8_t level) {
 #endif
 }
 
-void listFS(void)
-{
+void listFS() {
     traverseDirectory("/", 0);
 }
 
-void cat(const char *fname)
-{
-    if (!LittleFS.exists(fname))
-    {
+void cat(const char *fname) {
+    if (!LittleFS.exists(fname)) {
       Serial.printf("File %s does not exists\n\n", fname);
       return;
     }
@@ -67,10 +63,8 @@ void cat(const char *fname)
     file.close();
 }
 
-void rm(const char *fname)
-{
-    if (!LittleFS.exists(fname))
-    {
+void rm(const char *fname) {
+    if (!LittleFS.exists(fname)) {
       Serial.printf("File %s does not exists\n\n", fname);
       return;
     }

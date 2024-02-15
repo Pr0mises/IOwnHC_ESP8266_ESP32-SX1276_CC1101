@@ -1,7 +1,7 @@
 #pragma once 
 
-#define WIFI_SSID "mostorerIoT"
-#define WIFI_PWD ""
+#define WIFI_SSID "IoT"
+#define WIFI_PWD "IoT"
 
 #define HTTP_LISTEN_PORT    80
 #define HTTP_USERNAME       "admin"

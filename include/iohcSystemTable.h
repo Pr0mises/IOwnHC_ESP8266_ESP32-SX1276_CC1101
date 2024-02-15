@@ -5,9 +5,7 @@
 #include <string>
 #include <iohcObject.h>
 
-
 #define IOHC_SYS_TABLE  "/sysTable.json"
-
 
 /*
     Singleton class to implement the System Object Table.
@@ -15,29 +13,27 @@
 
     At this time this is only a container.
 */
-namespace IOHC
-{
-    class iohcSystemTable
-    {
+namespace IOHC {
+    class iohcSystemTable {
         public:
             using Objects = std::map<std::string, iohcObject *>;
 
             static iohcSystemTable *getInstance();
-            virtual ~iohcSystemTable() {};
+            virtual ~iohcSystemTable() = default;
             bool addObject(address node, address backbone, uint8_t actuator[2], uint8_t manufacturer, uint8_t flags);
             bool addObject(iohcObject *obj);
             bool addObject(std::string key, std::string serialized);
-            bool empty(void);
-            uint8_t size(void);
-            void clear(void);
-            inline iohcSystemTable::Objects::iterator begin(void);
-            inline iohcSystemTable::Objects::iterator end(void);
+            bool empty();
+            uint8_t size();
+            void clear();
+            inline iohcSystemTable::Objects::iterator begin();
+            inline iohcSystemTable::Objects::iterator end();
             bool save(bool force = false);
-            void dump(void);
+            void dump();
 
         private:
             iohcSystemTable();
-            bool load(void);
+            bool load();
             bool changed = false;
 
             static iohcSystemTable *_iohcSystemTable;

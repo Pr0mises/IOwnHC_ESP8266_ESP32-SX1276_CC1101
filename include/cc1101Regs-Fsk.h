@@ -1,11 +1,10 @@
 /*!
- * \file      cc1101-Fsk.h
+ * \file      cc1101Regs-Fsk.h
  *
  * \brief     CC1101 FSK modem registers and bits definitions
  */
 #ifndef __CC1101_REGS_FSK_H__
 #define __CC1101_REGS_FSK_H__
-
 
 // CC1101 SPI commands
 #define CMD_READ                                0b10000000

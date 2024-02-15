@@ -8,33 +8,29 @@ namespace IOHC
 {
     iohcRemote1W *iohcRemote1W::_iohcRemote1W = nullptr;
 
-    iohcRemote1W::iohcRemote1W()
-    {
+    iohcRemote1W::iohcRemote1W() {
         load();
     }
 
-    iohcRemote1W *iohcRemote1W::getInstance()
-    {
+    iohcRemote1W *iohcRemote1W::getInstance() {
         if (!_iohcRemote1W)
             _iohcRemote1W = new iohcRemote1W();
         return _iohcRemote1W;
     }
 
-    void iohcRemote1W::cmd(RemoteButton cmd)   // Emulates remote button press
-    {
-        for (uint8_t typn=0; typn<_type.size(); typn++) // Pre-allocate packets vector; one packet for each remote type loaded
-        {
+    void iohcRemote1W::cmd(RemoteButton cmd) {   // Emulates remote button press
+
+        for (uint8_t typn=0; typn<_type.size(); typn++) { // Pre-allocate packets vector; one packet for each remote type loaded
+
             if (!packets2send[typn])
                 packets2send[typn] = (IOHC::iohcPacket *)malloc(sizeof(IOHC::iohcPacket));
             else
                 memset((void *)packets2send[typn]->payload.buffer, 0x00, sizeof(packets2send[typn]->payload.buffer));
         }
 
-        switch (cmd)
-        {
+        switch (cmd) {
             case RemoteButton::Pair:   // 0x2e: 0x1120 + target broadcast + source + 0x2e00 + sequence + hmac
-                for (uint8_t typn=0; typn<_type.size(); typn++)
-                {
+                for (uint8_t typn=0; typn<_type.size(); typn++) {
                     // Packet length
                     packets2send[typn]->payload.packet.header.framelength = sizeof(_header)+sizeof(_p0x2e)-1;
                     // Flags
@@ -73,12 +69,10 @@ namespace IOHC
                     for (uint8_t i=0; i < 6; i ++)
                         packets2send[typn]->payload.packet.msg.p0x2e.hmac[i] = hmac[i];
 
-
                     Serial.printf("Setup: ");
                     for (uint8_t x=0; x<=packets2send[typn]->payload.packet.header.framelength; x++)
                         Serial.printf("%2.2x", packets2send[typn]->payload.buffer[x]);
                     Serial.printf("\n");
-
 
                     digitalWrite(RX_LED, digitalRead(RX_LED)^1);
                     packets2send[typn]->buffer_length = packets2send[typn]->payload.packet.header.framelength +1;
@@ -94,8 +88,7 @@ namespace IOHC
                 break;
 
             case RemoteButton::Remove:   // 0x39: 0x1c00 + target broadcast + source + 0x3900 + sequence + hmac
-                for (uint8_t typn=0; typn<_type.size(); typn++)
-                {
+                for (uint8_t typn=0; typn<_type.size(); typn++) {
                     // Packet length
                     packets2send[typn]->payload.packet.header.framelength = sizeof(_header)+sizeof(_p0x2e)-1;
                     // Flags
@@ -134,12 +127,10 @@ namespace IOHC
                     for (uint8_t i=0; i < 6; i ++)
                         packets2send[typn]->payload.packet.msg.p0x2e.hmac[i] = hmac[i];
 
-
                     Serial.printf("Remove: ");
                     for (uint8_t x=0; x<=packets2send[typn]->payload.packet.header.framelength; x++)
                         Serial.printf("%2.2x", packets2send[typn]->payload.buffer[x]);
                     Serial.printf("\n");
-
 
                     digitalWrite(RX_LED, digitalRead(RX_LED)^1);
                     packets2send[typn]->buffer_length = packets2send[typn]->payload.packet.header.framelength +1;
@@ -155,8 +146,7 @@ namespace IOHC
                 break;
 
             case RemoteButton::Add:   // 0x30: 0x1100 + target broadcast + source + 0x3000 + ???
-                for (uint8_t typn=0; typn<_type.size(); typn++)
-                {
+                for (uint8_t typn=0; typn<_type.size(); typn++) {
                     // Packet length
                     packets2send[typn]->payload.packet.header.framelength = sizeof(_header)+sizeof(_p0x30)-1;
                     // Flags
@@ -218,8 +208,7 @@ namespace IOHC
                 break;
 
             default:   // 0x00: 0x1600 + target broadcast + source + 0x00 + Originator + ACEI + Main Param + FP1 + FP2 + sequence + hmac
-                for (uint8_t typn=0; typn<_type.size(); typn++)
-                {
+                for (uint8_t typn=0; typn<_type.size(); typn++) {
                     // Packet length
                     packets2send[typn]->payload.packet.header.framelength = sizeof(_header)+sizeof(_p0x00)-1;
                     // Flags
@@ -248,8 +237,7 @@ namespace IOHC
                     packets2send[typn]->payload.packet.msg.p0x00.origin = 0x01; // Command Source Originator is: User
                     packets2send[typn]->payload.packet.msg.p0x00.acei = 0x61;
 
-                    switch (cmd)    // Switch for Main Parameter of cmd 0x00: Open/Close/Stop/Ventilation
-                    {
+                    switch (cmd) {   // Switch for Main Parameter of cmd 0x00: Open/Close/Stop/Ventilation
                         case RemoteButton::Open:
                             packets2send[typn]->payload.packet.msg.p0x00.main[0] = 0x00;
                             packets2send[typn]->payload.packet.msg.p0x00.main[1] = 0x00;
@@ -287,12 +275,10 @@ namespace IOHC
                     for (uint8_t i=0; i < 6; i ++)
                         packets2send[typn]->payload.packet.msg.p0x00.hmac[i] = hmac[i];
 
-
                     Serial.printf("Command: ");
                     for (uint8_t x=0; x<=packets2send[typn]->payload.packet.header.framelength; x++)
                         Serial.printf("%2.2x", packets2send[typn]->payload.buffer[x]);
                     Serial.printf("\n");
-
 
                     digitalWrite(RX_LED, digitalRead(RX_LED)^1);
                     packets2send[typn]->buffer_length = packets2send[typn]->payload.packet.header.framelength +1;
@@ -311,12 +297,10 @@ namespace IOHC
         save(); // Save sequence number
     }
 
-    bool iohcRemote1W::load(void)
-    {
+    bool iohcRemote1W::load() {
         if (LittleFS.exists(IOHC_1W_REMOTE))
             Serial.printf("Loading one way remote settings from %s\n", IOHC_1W_REMOTE);
-        else
-        {
+        else {
             Serial.printf("*One way remote not available\n");
             return false;
         }
@@ -327,8 +311,7 @@ namespace IOHC
         f.close();
 
         // Iterate through the JSON object
-        for (JsonPair kv : doc.as<JsonObject>())
-        {
+        for (JsonPair kv : doc.as<JsonObject>()) {
             hexStringToBytes(kv.key().c_str(), _node);
             JsonObject jobj = kv.value().as<JsonObject>();
             hexStringToBytes(jobj["key"].as<const char*>(), _key);
@@ -349,8 +332,7 @@ namespace IOHC
         return true;
     }
 
-    bool iohcRemote1W::save(void)
-    {
+    bool iohcRemote1W::save() {
         fs::File f = LittleFS.open(IOHC_1W_REMOTE, "w+");
         DynamicJsonDocument doc(256);
 

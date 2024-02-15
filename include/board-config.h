@@ -3,14 +3,12 @@
 //#define SX1276
 #define CC1101
 
-
 /*!
  * Defines the time required for the TCXO to wakeup [ms].
  */
 
 #define BOARD_TCXO_WAKEUP_TIME                      0
 #define BOARD_READY_AFTER_POR						10000
-
 
 /*!
  * Board MCU pins definitions - NodeMCUv2
@@ -34,7 +32,6 @@
     #endif
 #endif
 
-
 #if defined(SX1276)
     //#define RADIO_DIO_0                             5   // NodeMCU D1
     //#define RADIO_DIO_1                             2   // NodeMCU D4 // Not used - No wire
@@ -49,7 +46,6 @@
     #define RADIO_DIO_2                             33
 #endif
 
-
 #if defined(SX1276)
     #define RADIO_PACKET_AVAIL                      RADIO_DIO_0     // Packet Received / CRC ok from Radio
     #define RADIO_DATA_AVAIL                        RADIO_DIO_1     // FIFO empty from Radio
@@ -62,9 +58,7 @@
     // GD2 
 #endif
 
-
 #define SPI_CLK_FRQ                                 10000000
-
 
 #define PREAMBLE_MSB                                0x00
 #define PREAMBLE_LSB                                0x34    // 0x34: 12ms to have receiver up and running (52 0x55 bytes - 13,54mS)

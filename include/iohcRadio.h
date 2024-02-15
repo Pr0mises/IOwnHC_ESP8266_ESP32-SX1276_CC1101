@@ -26,27 +26,24 @@
 #define IOHC_INBOUND_MAX_PACKETS        199     // Maximum Inbound packets buffer
 #define IOHC_OUTBOUND_MAX_PACKETS       20      // Maximum Outbound packets
 
-
 /*
     Singleton class to implement an IOHC Radio abstraction layer for controllers.
     Implements all needed functionalities to receive and send packets from/to the air, masking complexities related to frequency hopping
     IOHC timings, async sending and receiving through callbacks, ...
 */
-namespace IOHC
-{
+namespace IOHC {
     using IohcPacketDelegate = Delegate<bool(IOHC::iohcPacket *iohc)>;
 
-    class iohcRadio
-    {
+    class iohcRadio {
         public:
             static iohcRadio *getInstance();
-            virtual ~iohcRadio() {};
+            virtual ~iohcRadio() = default;
             void start(uint8_t num_freqs, uint32_t *scan_freqs, uint32_t scanTimeUs, IohcPacketDelegate rxCallback, IohcPacketDelegate txCallback);
             void send(IOHC::iohcPacket *iohcTx[]);
 
         private:
             iohcRadio();
-            bool receive(void);
+            bool receive();
             bool sent(IOHC::iohcPacket *packet);
 
             static iohcRadio *_iohcRadio;
@@ -64,8 +61,8 @@ namespace IOHC
             volatile uint8_t txCounter = 0;
 
             uint8_t num_freqs = 0;
-            uint32_t *scan_freqs;
-            uint32_t scanTimeUs;
+            uint32_t *scan_freqs{};
+            uint32_t scanTimeUs{};
             uint8_t currentFreq = 0;
 
 
@@ -81,17 +78,15 @@ namespace IOHC
 //            Timers::TickerUsESP32 FreqScanner;    
 #endif
 
-
-
-            IOHC::iohcPacket *iohc;
+            IOHC::iohcPacket *iohc{};
             IohcPacketDelegate rxCB = nullptr;
             IohcPacketDelegate txCB = nullptr;
-            IOHC::iohcPacket *packets2send[IOHC_OUTBOUND_MAX_PACKETS];
+            IOHC::iohcPacket *packets2send[IOHC_OUTBOUND_MAX_PACKETS]{};
 
         protected:
 //#if defined(SX1276)
-            static void IRAM_ATTR i_preamble(void);
-            static void IRAM_ATTR i_payload(void);
+            static void IRAM_ATTR i_preamble();
+            static void IRAM_ATTR i_payload();
             static void tickerCounter(iohcRadio *radio);
             static void packetSender(iohcRadio *radio);
 //#elif defined(CC1101)

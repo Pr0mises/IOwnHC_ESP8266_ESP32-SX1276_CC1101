@@ -4,7 +4,6 @@
 #include <board-config.h>
 #include <SPI.h>
 
-
 #if defined(ESP8266)
 
 #elif defined(ESP32)
@@ -15,7 +14,7 @@
 #define MSBFIRST 1
 
 #define KHz     *1000
-#define MHz     KHz *1000
+#define MHz     (KHz *1000)
 #define FXOSC   32000000
 #define LOWER   525000000
 #define HIGHER  779000000
@@ -29,13 +28,10 @@
 
 #define RF_PACKETCONFIG2_IOHOME_POWERFRAME  0x10    // Missing from SX1276 FSK modem registers and bits definitions
 
-
-
 /*
     Helper functions to setup and manage SX1276 registry configuration, query status and SPI interaction
 */
-namespace Radio
-{
+namespace Radio {
     enum class Carrier {
         Frequency,
         Deviation,
@@ -50,8 +46,7 @@ namespace Radio
         LoRa
     };
 
-    typedef struct  
-    {
+    typedef struct {
         uint32_t    carrierFrequency;
         uint8_t     rfOpMode;
         uint32_t    bitRate;
@@ -59,33 +54,30 @@ namespace Radio
         uint8_t     seqConf[2];
     } WorkingParams;
 
-    typedef struct
-    {
+    typedef struct {
         uint8_t     Mant;
         uint8_t     Exp;
     } regBandWidth;
 
-
-
-    void initHardware(void);
+    void initHardware();
     void initRegisters(uint8_t maxPayloadLength);
-    void calibrate(void);
-    void setStandby(void);
-    void setTx(void);
-    void setRx(void);
-    void clearBuffer(void);
-    void clearFlags(void);
-    bool preambleDetected(void);
-    bool syncedAddress(void);
-    bool dataAvail(void);
-    bool crcOk(void);
+    void calibrate();
+    void setStandby();
+    void setTx();
+    void setRx();
+    void clearBuffer();
+    void clearFlags();
+    bool preambleDetected();
+    bool syncedAddress();
+    bool dataAvail();
+    bool crcOk();
     uint8_t readByte(uint8_t regAddr);
     void readBytes(uint8_t regAddr, uint8_t *out, uint8_t len);
     bool writeByte(uint8_t regAddr, uint8_t data, bool check = NULL);
     bool writeBytes(uint8_t regAddr, uint8_t *in, uint8_t len, bool check = NULL);
-    bool inStdbyOrSleep(void);
+    bool inStdbyOrSleep();
     bool setParams();
     bool setCarrier(Carrier param, uint32_t value);
     regBandWidth bwRegs(uint8_t bandwidth);
-    void dump(void);
+    void dump();
 }

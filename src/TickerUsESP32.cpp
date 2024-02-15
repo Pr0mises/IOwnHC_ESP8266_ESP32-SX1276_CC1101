@@ -1,4 +1,5 @@
 #define USE_US_TIMER
+#include <cstdint>
 
 #if defined(ESP32)
 
@@ -8,7 +9,7 @@
 //{
 
     TickerUsESP32::TickerUsESP32() :
-    _timer(nullptr) {}
+    _timer(nullptr) = default;
 
     TickerUsESP32::~TickerUsESP32() {
     detach();
