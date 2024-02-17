@@ -53,7 +53,7 @@ namespace Timers {
     }
 
     void TickerUs::_static_callback(void* arg) {
-        auto* _this = reinterpret_cast<TickerUs*>(arg);
+        auto* _this = static_cast<TickerUs*>(arg);
         if (_this && _this->_callback_function)
             _this->_callback_function();
     }

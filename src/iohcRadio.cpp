@@ -63,22 +63,20 @@ namespace IOHC {
     void iohcRadio::tickerCounter(iohcRadio *radio) {
 #if defined(SX1276)
         Radio::readBytes(REG_IRQFLAGS1, __flags, sizeof(__flags));
-
-        if (__g_payload)                                                // If Int of PayLoad
-        {
-            if (__flags[0] & RF_IRQFLAGS1_TXREADY)                      // if TX ready?
-            {
+// If Int of PayLoad
+        if (__g_payload) {
+            // if TX ready?
+            if (__flags[0] & RF_IRQFLAGS1_TXREADY) {
                 radio->sent(radio->iohc);
                 Radio::clearFlags();
-                if (!txMode)
-                {
+                if (!txMode) {
                     Radio::setRx();
                     f_lock = false;
                 }
                 return;
             }
-            else                                                        // if in RX mode?
-            {
+            // if in RX mode?
+            else {
                 radio->receive();
                 radio->tickCounter = 0;
                 radio->preCounter = 0;
@@ -86,13 +84,13 @@ namespace IOHC {
             }
         }
 
-        if (__g_preamble)
-        {
+        if (__g_preamble) {
             radio->tickCounter = 0;
             radio->preCounter += 1;
-            if (__flags[0] & RF_IRQFLAGS1_SYNCADDRESSMATCH) radio->preCounter = 0;  // In case of Sync received resets the preamble duration
-            if ((radio->preCounter * SM_GRANULARITY_US) >= SM_PREAMBLE_RECOVERY_TIMEOUT_US) // Avoid hanging on a too long preamble detect 
-            {
+            // In case of Sync received resets the preamble duration
+            if (__flags[0] & RF_IRQFLAGS1_SYNCADDRESSMATCH) radio->preCounter = 0;
+            // Avoid hanging on a too long preamble detect
+            if ((radio->preCounter * SM_GRANULARITY_US) >= SM_PREAMBLE_RECOVERY_TIMEOUT_US) {
                 Radio::clearFlags();
                 radio->preCounter = 0;
             }
@@ -100,7 +98,6 @@ namespace IOHC {
 
         if (f_lock)
             return;
-
 
         if ((++radio->tickCounter * SM_GRANULARITY_US) < radio->scanTimeUs)
             return;
@@ -113,10 +110,10 @@ namespace IOHC {
         Radio::setCarrier(Radio::Carrier::Frequency, radio->scan_freqs[radio->currentFreq]);
         digitalWrite(SCAN_LED, true);
 
-        return;
+//        return;
 
 #elif defined(CC1101)
-        if (__g_preamble){
+        if (__g_preamble) {
             radio->receive();
             radio->tickCounter = 0;
             radio->preCounter = 0;
@@ -161,8 +158,7 @@ namespace IOHC {
 
         digitalWrite(RX_LED, digitalRead(RX_LED)^1);
 #if defined(SX1276)
-        for (uint8_t idx=0; idx < radio->iohc->buffer_length; ++idx)
-        {
+        for (uint8_t idx=0; idx < radio->iohc->buffer_length; ++idx) {
             Radio::writeByte(REG_FIFO, radio->iohc->payload.buffer[idx]);       // Is valid for both SX1276 & CC1101?
         }
 #elif defined(CC1101)
@@ -176,7 +172,7 @@ namespace IOHC {
 
         if (radio->iohc->repeat)
             radio->iohc->repeat -= 1;
-        if (radio->iohc->repeat == 0)  {
+        if (radio->iohc->repeat == 0) {
             radio->Sender.detach();
             if (radio->packets2send[++(radio->txCounter)])
                 radio->Sender.attach_ms(radio->packets2send[radio->txCounter]->millis, radio->packetSender, radio);

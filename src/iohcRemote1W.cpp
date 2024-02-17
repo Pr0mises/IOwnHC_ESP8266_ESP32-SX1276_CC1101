@@ -4,8 +4,7 @@
 #include <iohcCryptoHelpers.h>
 
 
-namespace IOHC
-{
+namespace IOHC {
     iohcRemote1W *iohcRemote1W::_iohcRemote1W = nullptr;
 
     iohcRemote1W::iohcRemote1W() {
@@ -20,7 +19,7 @@ namespace IOHC
 
     void iohcRemote1W::cmd(RemoteButton cmd) {   // Emulates remote button press
 
-        for (uint8_t typn=0; typn<_type.size(); typn++) { // Pre-allocate packets vector; one packet for each remote type loaded
+        for (size_t typn=0; typn<_type.size(); typn++) { // Pre-allocate packets vector; one packet for each remote type loaded
 
             if (!packets2send[typn])
                 packets2send[typn] = (IOHC::iohcPacket *)malloc(sizeof(IOHC::iohcPacket));
@@ -30,7 +29,7 @@ namespace IOHC
 
         switch (cmd) {
             case RemoteButton::Pair:   // 0x2e: 0x1120 + target broadcast + source + 0x2e00 + sequence + hmac
-                for (uint8_t typn=0; typn<_type.size(); typn++) {
+                for (size_t typn=0; typn<_type.size(); typn++) {
                     // Packet length
                     packets2send[typn]->payload.packet.header.framelength = sizeof(_header)+sizeof(_p0x2e)-1;
                     // Flags
@@ -46,7 +45,7 @@ namespace IOHC
                     packets2send[typn]->payload.packet.header.routed = 0;
                     packets2send[typn]->payload.packet.header.use_beacon = 0;
                     // Source (me)
-                    for (uint8_t i=0; i<sizeof(address); i++)
+                    for (size_t i=0; i<sizeof(address); i++)
                         packets2send[typn]->payload.packet.header.source[i] = _node[i];
                     // Broadcast Target
                     uint16_t bcast = (_type.at(typn)<<6) + 0b111111;
@@ -63,7 +62,7 @@ namespace IOHC
                     packets2send[typn]->payload.packet.msg.p0x2e.sequence[1] = _sequence & 0x00ff;
                     _sequence += 1;
                     // hmac
-                    uint8_t hmac[6];
+                    uint8_t hmac[16];
                     std::vector<uint8_t> frame(&packets2send[typn]->payload.packet.header.cmd, &packets2send[typn]->payload.packet.header.cmd+2);
                     iohcUtils::create_1W_hmac(hmac, packets2send[typn]->payload.packet.msg.p0x2e.sequence, _key, frame);
                     for (uint8_t i=0; i < 6; i ++)
@@ -88,7 +87,7 @@ namespace IOHC
                 break;
 
             case RemoteButton::Remove:   // 0x39: 0x1c00 + target broadcast + source + 0x3900 + sequence + hmac
-                for (uint8_t typn=0; typn<_type.size(); typn++) {
+                for (size_t typn=0; typn<_type.size(); typn++) {
                     // Packet length
                     packets2send[typn]->payload.packet.header.framelength = sizeof(_header)+sizeof(_p0x2e)-1;
                     // Flags
@@ -104,7 +103,7 @@ namespace IOHC
                     packets2send[typn]->payload.packet.header.routed = 0;
                     packets2send[typn]->payload.packet.header.use_beacon = 0;
                     // Source (me)
-                    for (uint8_t i=0; i<sizeof(address); i++)
+                    for (size_t i=0; i<sizeof(address); i++)
                         packets2send[typn]->payload.packet.header.source[i] = _node[i];
                     // Broadcast Target
                     uint16_t bcast = (_type.at(typn)<<6) + 0b111111;
@@ -121,7 +120,7 @@ namespace IOHC
                     packets2send[typn]->payload.packet.msg.p0x2e.sequence[1] = _sequence & 0x00ff;
                     _sequence += 1;
                     // hmac
-                    uint8_t hmac[6];
+                    uint8_t hmac[16];
                     std::vector<uint8_t> frame(&packets2send[typn]->payload.packet.header.cmd, &packets2send[typn]->payload.packet.header.cmd+2);
                     iohcUtils::create_1W_hmac(hmac, packets2send[typn]->payload.packet.msg.p0x2e.sequence, _key, frame);
                     for (uint8_t i=0; i < 6; i ++)
@@ -146,7 +145,7 @@ namespace IOHC
                 break;
 
             case RemoteButton::Add:   // 0x30: 0x1100 + target broadcast + source + 0x3000 + ???
-                for (uint8_t typn=0; typn<_type.size(); typn++) {
+                for (size_t typn=0; typn<_type.size(); typn++) {
                     // Packet length
                     packets2send[typn]->payload.packet.header.framelength = sizeof(_header)+sizeof(_p0x30)-1;
                     // Flags
@@ -162,7 +161,7 @@ namespace IOHC
                     packets2send[typn]->payload.packet.header.routed = 0;
                     packets2send[typn]->payload.packet.header.use_beacon = 0;
                     // Source (me)
-                    for (uint8_t i=0; i<sizeof(address); i++)
+                    for (size_t i=0; i<sizeof(address); i++)
                         packets2send[typn]->payload.packet.header.source[i] = _node[i];
                     // Broadcast Target
                     uint16_t bcast = (_type.at(typn)<<6) + 0b111111;
@@ -208,7 +207,7 @@ namespace IOHC
                 break;
 
             default:   // 0x00: 0x1600 + target broadcast + source + 0x00 + Originator + ACEI + Main Param + FP1 + FP2 + sequence + hmac
-                for (uint8_t typn=0; typn<_type.size(); typn++) {
+                for (size_t typn=0; typn<_type.size(); typn++) {
                     // Packet length
                     packets2send[typn]->payload.packet.header.framelength = sizeof(_header)+sizeof(_p0x00)-1;
                     // Flags
@@ -224,7 +223,7 @@ namespace IOHC
                     packets2send[typn]->payload.packet.header.routed = 0;
                     packets2send[typn]->payload.packet.header.use_beacon = 0;
                     // Source (me)
-                    for (uint8_t i=0; i<sizeof(address); i++)
+                    for (size_t i=0; i<sizeof(address); i++)
                         packets2send[typn]->payload.packet.header.source[i] = _node[i];
                     // Broadcast Target
                     uint16_t bcast = (_type.at(typn)<<6) + 0b111111;
@@ -269,7 +268,7 @@ namespace IOHC
                     _sequence += 1;
 
                     // hmac
-                    uint8_t hmac[6];
+                    uint8_t hmac[16];
                     std::vector<uint8_t> frame(&packets2send[typn]->payload.packet.header.cmd, &packets2send[typn]->payload.packet.header.cmd+7);
                     iohcUtils::create_1W_hmac(hmac, packets2send[typn]->payload.packet.msg.p0x00.sequence, _key, frame);
                     for (uint8_t i=0; i < 6; i ++)
@@ -313,7 +312,7 @@ namespace IOHC
         // Iterate through the JSON object
         for (JsonPair kv : doc.as<JsonObject>()) {
             hexStringToBytes(kv.key().c_str(), _node);
-            JsonObject jobj = kv.value().as<JsonObject>();
+            auto jobj = kv.value().as<JsonObject>();
             hexStringToBytes(jobj["key"].as<const char*>(), _key);
             uint8_t btmp[2];  
             hexStringToBytes(jobj["sequence"].as<const char*>(), btmp);
@@ -343,11 +342,11 @@ namespace IOHC
         btmp[0] = _sequence >> 8;
         jobj["sequence"] = bytesToHexString(btmp, sizeof(btmp));
         JsonArray jarr = jobj.createNestedArray("type");
-        for (uint8_t i=0; i<_type.size(); i++)
-            if (_type[i])
+        for (size_t i=0; i<_type.size(); i++)
+//            if (_type[i])
                 jarr.add(_type.at(i));
-            else
-                break;
+//            else
+//                break;
         jobj["manufacturer_id"] = _manufacturer;
 
         serializeJson(doc, f);

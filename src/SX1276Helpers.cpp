@@ -35,20 +35,17 @@ namespace Radio {
         {250, {0x00, 0x01}}  // 250KHz
     };
 
-    void SPI_beginTransaction(void)
-    {
+    void SPI_beginTransaction() {
         SPI.beginTransaction(Radio::SpiSettings);
         digitalWrite(RADIO_NSS, LOW);
     }
 
-    void SPI_endTransaction(void)
-    {
+    void SPI_endTransaction() {
         digitalWrite(RADIO_NSS, HIGH);
         SPI.endTransaction();
     }
 
-    void initHardware(void)
-    {
+    void initHardware() {
         Serial.println("SPI Init");
         // SPI pins configuration
     #if defined(ESP8266)
@@ -90,8 +87,7 @@ namespace Radio {
         digitalWrite(SCAN_LED, 1);
     }
 
-    void initRegisters(uint8_t maxPayloadLength = 0xff)
-    {
+    void initRegisters(uint8_t maxPayloadLength = 0xff) {
         // Firstly put radio in StandBy mode as some parameters cannot be changed differently
         writeByte(REG_OPMODE, (readByte(REG_OPMODE) & RF_OPMODE_MASK) | RF_OPMODE_STANDBY);
 
@@ -153,8 +149,7 @@ namespace Radio {
 /*---*/
     }
 
-    void calibrate(void)
-    {
+    void calibrate() {
         // RC Calibration (only call after setting correct frequency band)
         writeByte(REG_OSC, RF_OSC_RCCALSTART);
         // Start image and RSSI calibration
@@ -163,13 +158,12 @@ namespace Radio {
         do {} while (readByte(REG_IMAGECAL) & RF_IMAGECAL_IMAGECAL_RUNNING);
     }
 
-    void setStandby(void)
-    {
+    void setStandby() {
         writeByte(REG_OPMODE, (readByte(REG_OPMODE) & RF_OPMODE_MASK) | RF_OPMODE_STANDBY);
     }
 
-    void setTx(void)    // Uncommon and incompatible settings
-    {
+    void setTx() {   // Uncommon and incompatible settings
+
         // Enabling Sync word - Size must be set to SYNCSIZE_2 (0x01 in header file)
         writeByte(REG_SYNCCONFIG, (readByte(REG_SYNCCONFIG) & RF_SYNCCONFIG_SYNCSIZE_MASK) | RF_SYNCCONFIG_SYNCSIZE_2);
 
@@ -177,8 +171,8 @@ namespace Radio {
         TxReady;
     }
 
-    void setRx(void)    // Uncommon and incompatible settings
-    {
+    void setRx() {   // Uncommon and incompatible settings
+
         writeByte(REG_SYNCCONFIG, (readByte(REG_SYNCCONFIG) & RF_SYNCCONFIG_SYNCSIZE_MASK) | RF_SYNCCONFIG_SYNCSIZE_3);
 
         writeByte(REG_OPMODE, (readByte(REG_OPMODE) & RF_OPMODE_MASK) | RF_OPMODE_RECEIVER);
@@ -190,76 +184,63 @@ namespace Radio {
 */
     }
 
-    void clearBuffer(void)
-    {
+    void clearBuffer() {
         for (uint8_t idx=0; idx <= 64; ++idx)   // Clears FIFO at startup to avoid dirty reads
             readByte(REG_FIFO);
     }
 
-    void clearFlags(void)
-    {
+    void clearFlags() {
         uint8_t out[2] = {0xff, 0xff};
         writeBytes(REG_IRQFLAGS1, out, 2);
     }
 
-    bool preambleDetected(void)
-    {
+    bool preambleDetected() {
         return (readByte(REG_IRQFLAGS1) & RF_IRQFLAGS1_PREAMBLEDETECT);
     }
 
-    bool syncedAddress(void)
-    {
+    bool syncedAddress() {
         return (readByte(REG_IRQFLAGS1) & RF_IRQFLAGS1_SYNCADDRESSMATCH);
     }
 
-    bool dataAvail(void)
-    {
+    bool dataAvail() {
         return ((readByte(REG_IRQFLAGS2) & RF_IRQFLAGS2_FIFOEMPTY)?false:true);
     }
 
-    uint8_t readByte(uint8_t regAddr)
-    {
+    uint8_t readByte(uint8_t regAddr) {
         uint8_t getByte;
         readBytes(regAddr, &getByte, 1);
 
         return (getByte);
     }
 
-    void readBytes(uint8_t regAddr, uint8_t *out, uint8_t len)
-    {
+    void readBytes(uint8_t regAddr, uint8_t *out, uint8_t len) {
         SPI_beginTransaction();
         SPI.transfer(regAddr);                  // Send Address
         for (uint8_t idx=0; idx < len; ++idx)
             out[idx] = SPI.transfer(regAddr);   // Get data
         SPI_endTransaction();
-
-        return;
+        //        return;
     }
 
-    bool writeByte(uint8_t regAddr, uint8_t data, bool check)
-    {
+    bool writeByte(uint8_t regAddr, uint8_t data, bool check) {
         return writeBytes(regAddr, &data, 1, check);
     }
 
-    bool writeBytes(uint8_t regAddr, uint8_t *in, uint8_t len, bool check)
-    {
+    bool writeBytes(uint8_t regAddr, uint8_t *in, uint8_t len, bool check) {
         SPI_beginTransaction();
         SPI.write(regAddr | SPI_Write);      // Send Address with Write flag
         for (uint8_t idx=0; idx < len; ++idx)
             SPI.write(in[idx]);              // Send data
         SPI_endTransaction();
 
-        if (check)
-        {
+        if (check) {
             uint8_t getByte;
 
             SPI_beginTransaction();
             SPI.transfer(regAddr);                  // Send Address
-            for (uint8_t idx=0; idx < len; ++idx)
-            {
+            for (uint8_t idx=0; idx < len; ++idx) {
                 getByte = SPI.transfer(regAddr);    // Get data
-                if (in[idx] != getByte)
-                {
+                if (in[idx] != getByte) {
                     SPI_endTransaction();
                     return false;
                 }
@@ -270,8 +251,7 @@ namespace Radio {
         return true;
     }
 
-    bool inStdbyOrSleep(void)
-    {
+    bool inStdbyOrSleep() {
         uint8_t data = readByte(REG_OPMODE);
         data &= ~RF_OPMODE_MASK;
         if ((data == RF_OPMODE_SLEEP) || (data == RF_OPMODE_STANDBY))
@@ -280,8 +260,7 @@ namespace Radio {
         return false;
     }
 
-    bool setCarrier(Carrier param, uint32_t value)
-    {
+    bool setCarrier(Carrier param, uint32_t value) {
         uint32_t tmpVal;
         uint8_t out[4];
         regBandWidth bw;
@@ -291,8 +270,7 @@ namespace Radio {
             if (param != Carrier::Frequency)
                 return false;
 
-        switch (param)
-        {
+        switch (param) {
             case Carrier::Frequency:
                 tmpVal = (uint32_t)(((float_t)value/FXOSC)*(1<<19));
                 out[0] = (tmpVal & 0x00ff0000) >> 16;
@@ -312,8 +290,7 @@ namespace Radio {
                 writeBytes(REG_FDEVMSB, out, 2);
                 break;
             case Carrier::Modulation:
-                switch (value)
-                {
+                switch (value) {
                     case Modulation::FSK:
                         uint8_t rfOpMode = readByte(REG_OPMODE);
                         rfOpMode &= RF_OPMODE_LONGRANGEMODE_MASK;
@@ -338,22 +315,19 @@ namespace Radio {
         return true;
     }
 
-    regBandWidth bwRegs(uint8_t bandwidth)
-    {
-        for (auto it = __bw.begin(); it != __bw.end(); it++)
-            if (it->first == bandwidth)
-                return it->second;
+    regBandWidth bwRegs(uint8_t bandwidth) {
+        for (auto & it : __bw)
+            if (it.first == bandwidth)
+                return it.second;
 
         return __bw.rbegin()->second;
     }
 
-    void dump()
-    {
+    void dump() {
         uint8_t idx = 1;
 
         Serial.printf("*********************** Radio registers ***********************\n");
-        do       
-        {
+        do {
             Serial.printf("*%2.2x=%2.2x\t", idx, readByte(idx)); idx += 1;
             Serial.printf("*%2.2x=%2.2x\t", idx, readByte(idx)); idx += 1;
             Serial.printf("*%2.2x=%2.2x\t", idx, readByte(idx)); idx += 1;

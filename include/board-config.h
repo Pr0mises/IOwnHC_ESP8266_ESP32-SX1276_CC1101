@@ -1,7 +1,7 @@
 #pragma once
 
-//#define SX1276
-#define CC1101
+#define SX1276
+//#define CC1101
 
 /*!
  * Defines the time required for the TCXO to wakeup [ms].

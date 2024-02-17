@@ -81,7 +81,7 @@ namespace IOHC {
         // Iterate through the JSON object
         for (JsonPair kv : doc.as<JsonObject>()) {
             const char* key = kv.key().c_str();
-            JsonObject obj = kv.value().as<JsonObject>();
+            auto obj = kv.value().as<JsonObject>();
             for (JsonPair ov : obj)
                 addObject(key, ov.value().as<std::string>());
         }

@@ -3,8 +3,7 @@
 
 namespace IOHC
 {
-    iohcObject::iohcObject()
-    = default;
+    iohcObject::iohcObject() = default;
 
     iohcObject::iohcObject(address node, address backbone, uint8_t actuator[2], uint8_t manufacturer, uint8_t flags) {
         for (uint8_t i=0; i<3; i++) {

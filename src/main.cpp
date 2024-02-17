@@ -12,7 +12,6 @@
     #include <ESP32SSDP.h>
 #endif
 
-
 #include <ESPAsyncWebServer.h>
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration - Async branch
 /*
@@ -24,6 +23,7 @@
 #endif
 */
 #include <board-config.h>
+#include <CC1101Helpers.h>
 #include <user_config.h>
 #include <globals.h>
 #include <WebServerHelpers.h>
@@ -280,7 +280,6 @@ bool msgRcvd(IOHC::iohcPacket *iohc) {
     else
         _dir = '<';
 
-
     if (verbosity) {
         Serial.printf("Len: %2.2u, mode: %1xW, first: %s, last: %s,", iohc->payload.packet.header.framelength, iohc->payload.packet.header.mode?1:2, iohc->payload.packet.header.first?"T":"F", iohc->payload.packet.header.last?"T":"F");
         Serial.printf(" b: %u, r: %u, lp: %u, ack: %u, prt: %u", iohc->payload.packet.header.use_beacon, iohc->payload.packet.header.routed, iohc->payload.packet.header.low_p, iohc->payload.packet.header.ack, iohc->payload.packet.header.prot_v);
@@ -328,6 +327,7 @@ bool msgRcvd(IOHC::iohcPacket *iohc) {
                 Serial.printf("\n");
                 break;
             }
+            default: break;
         }
     }
 

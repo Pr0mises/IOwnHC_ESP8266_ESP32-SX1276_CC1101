@@ -4,7 +4,7 @@
     Helper function to convert a string containing hex numbers to a bytes sequence; one byte every two characters
 */
 uint8_t hexStringToBytes(const std::string hexString, uint8_t *byteString) {
-    uint8_t i;
+    size_t i;
 
     if (hexString.length() % 2 != 0)
         return 0;

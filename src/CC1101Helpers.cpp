@@ -1,4 +1,4 @@
-#include <Arduino.h>                // Is this not required?
+//#include <Arduino.h>                // Is this not required?
 
 #include <CC1101Helpers.h>
 #if defined(CC1101)

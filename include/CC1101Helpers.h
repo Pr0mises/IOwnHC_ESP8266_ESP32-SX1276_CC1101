@@ -14,7 +14,7 @@
 #define MSBFIRST 1
 
 #define KHz     *1000
-#define MHz     KHz *1000
+#define MHz     (KHz *1000)
 #define FXOSC   26000000
 //#define LOWER   525000000
 //#define HIGHER  779000000
