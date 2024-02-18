@@ -9,7 +9,7 @@
 //{
 
     TickerUsESP32::TickerUsESP32() :
-    _timer(nullptr) = default;
+    _timer(nullptr) {};
 
     TickerUsESP32::~TickerUsESP32() {
     detach();

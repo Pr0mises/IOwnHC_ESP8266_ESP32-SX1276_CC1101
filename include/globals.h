@@ -36,7 +36,7 @@ namespace Cmd {
       inline Timers::TickerUs kbd_tick;
 #elif defined(ESP32)
       //Timers::TickerUsESP32 kbd_tick;
-      TickerUsESP32 kbd_tick;
+      inline TickerUsESP32 kbd_tick;
       //Ticker kbd_tick2;
 #endif
 
@@ -65,12 +65,12 @@ namespace Cmd {
       if (_cmdHandler[idx] != nullptr)
         ; // Skip already allocated cmd handler
       else {
-        alloc = malloc(sizeof(struct _cmdEntry));
+        alloc = malloc(sizeof(_cmdEntry));
         if (!alloc)
           return false;
 
-        _cmdHandler[idx] = (struct _cmdEntry *)alloc;
-        memset(alloc, 0, sizeof(struct _cmdEntry));
+        _cmdHandler[idx] = (_cmdEntry *)alloc;
+        memset(alloc, 0, sizeof(_cmdEntry));
         strncpy(_cmdHandler[idx]->cmd, cmd, strlen(cmd)<sizeof(_cmdHandler[idx]->cmd)?strlen(cmd):sizeof(_cmdHandler[idx]->cmd) - 1);
         strncpy(_cmdHandler[idx]->description, description, strlen(cmd)<sizeof(_cmdHandler[idx]->description)?strlen(description):sizeof(_cmdHandler[idx]->description) - 1);
         _cmdHandler[idx]->handler = handler;
