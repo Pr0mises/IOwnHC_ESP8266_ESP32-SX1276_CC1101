@@ -1,4 +1,6 @@
-#pragma once
+// #pragma once
+#ifndef TICKERUSESP32_H
+#define TICKERUSESP32_H
 
 extern "C" {
   #include "esp_timer.h"
@@ -65,7 +67,7 @@ void system_timer_reinit();
     template<typename TArg>
     void once(float seconds, void (*callback)(TArg), TArg arg) {
         static_assert(sizeof(TArg) <= sizeof(uint32_t), "attach() callback argument size must be <= 4 bytes");
-        uint32_t arg32 = (uint32_t)(arg);
+        auto arg32 = (uint32_t)(arg);
         _attach_ms(seconds * 1000, false, reinterpret_cast<callback_with_arg_t>(callback), arg32);
     }
 
@@ -91,3 +93,4 @@ void system_timer_reinit();
     };
 //}
 
+#endif // TICKERUSESP32_H

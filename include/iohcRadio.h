@@ -1,4 +1,6 @@
-#pragma once
+// #pragma once
+#ifndef IOHCRADIO_H
+#define IOHCRADIO_H
 
 #include <Arduino.h>
 #include <board-config.h>
@@ -100,3 +102,4 @@ namespace IOHC {
 #endif
     };
 }
+#endif // IOHCRADIO_H

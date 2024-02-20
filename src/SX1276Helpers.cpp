@@ -263,7 +263,7 @@ namespace Radio {
     bool setCarrier(Carrier param, uint32_t value) {
         uint32_t tmpVal;
         uint8_t out[4];
-        regBandWidth bw;
+        regBandWidth bw{};
 
 //  Change of Frequency can be done while the radio is working thanks to Freq Hopping
         if (!inStdbyOrSleep())

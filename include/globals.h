@@ -2,13 +2,16 @@
   General utility functions
 */
 
-#pragma once
-#include <vector> 
-#include <sstream> 
+// #pragma once
+#ifndef GLOBALS_H
+#define GLOBALS_H
+
+#include <vector>
+#include <sstream>
 
 #if defined(ESP8266)
   #include <TickerUs.h>
-#elif defined(ESP32)  	
+#elif defined(ESP32)
   #include <TickerUsESP32.h>
 #endif
 
@@ -49,13 +52,13 @@ namespace Cmd {
   inline uint8_t lastEntry = 0;
 
   inline void tokenize(std::string const &str, const char delim, Tokens &out) {
-      // construct a stream from the string 
-      std::stringstream ss(str); 
+      // construct a stream from the string
+      std::stringstream ss(str);
 
-      std::string s; 
-      while (std::getline(ss, s, delim)) { 
-          out.push_back(s); 
-      } 
+      std::string s;
+      while (std::getline(ss, s, delim)) {
+          out.push_back(s);
+      }
   }
 
   inline bool addHandler(char *cmd, char *description, void (*handler)(Tokens*)) {
@@ -69,7 +72,7 @@ namespace Cmd {
         if (!alloc)
           return false;
 
-        _cmdHandler[idx] = (_cmdEntry *)alloc;
+        _cmdHandler[idx] = static_cast<_cmdEntry *>(alloc);
         memset(alloc, 0, sizeof(_cmdEntry));
         strncpy(_cmdHandler[idx]->cmd, cmd, strlen(cmd)<sizeof(_cmdHandler[idx]->cmd)?strlen(cmd):sizeof(_cmdHandler[idx]->cmd) - 1);
         strncpy(_cmdHandler[idx]->description, description, strlen(cmd)<sizeof(_cmdHandler[idx]->description)?strlen(description):sizeof(_cmdHandler[idx]->description) - 1);
@@ -77,7 +80,7 @@ namespace Cmd {
         if (idx > lastEntry)
           lastEntry = idx;
         return true;
-      } 
+      }
     }
     return false;
   }
@@ -103,8 +106,8 @@ namespace Cmd {
 
   inline void cmdFuncHandler(){
     char *_cmd;
-    const char delim = ' '; 
-    Tokens segments; 
+    const char delim = ' ';
+    Tokens segments;
 
     _cmd = cmdReceived(true);
     if (!_cmd) return;
@@ -133,5 +136,6 @@ namespace Cmd {
 
   inline void init() {
     kbd_tick.attach_ms(100, cmdFuncHandler);
-  }  
+  }
 }
+#endif // GLOBALS_H

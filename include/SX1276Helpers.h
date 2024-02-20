@@ -1,4 +1,6 @@
-#pragma once
+// #pragma once
+#ifndef SX1276HELPERS_H
+#define SX1276HELPERS_H
 
 #include <sx1276Regs-Fsk.h>
 #include <board-config.h>
@@ -46,18 +48,18 @@ namespace Radio {
         LoRa
     };
 
-    typedef struct {
+    struct WorkingParams {
         uint32_t    carrierFrequency;
         uint8_t     rfOpMode;
         uint32_t    bitRate;
         uint32_t    deviation;
         uint8_t     seqConf[2];
-    } WorkingParams;
+    };
 
-    typedef struct {
+    struct regBandWidth {
         uint8_t     Mant;
         uint8_t     Exp;
-    } regBandWidth;
+    };
 
     void initHardware();
     void initRegisters(uint8_t maxPayloadLength);
@@ -81,3 +83,4 @@ namespace Radio {
     regBandWidth bwRegs(uint8_t bandwidth);
     void dump();
 }
+#endif // SX1276HELPERS_H

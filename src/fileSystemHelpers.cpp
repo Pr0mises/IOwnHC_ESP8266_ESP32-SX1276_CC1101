@@ -43,8 +43,6 @@ void traverseDirectory(const char* dirName, uint8_t level) {
       printFileInfo(dirName, fileName.name(), level);
     }
   }
-
-    
 #endif
 }
 

@@ -1,7 +1,9 @@
-#pragma once
+// #pragma once
 
 //#include <Arduino.h>
-#include <string>
+// #include <string>
+#ifndef IOHCREMOTE1W_H
+#define IOHCREMOTE1W_H
 #include <iohcRadio.h>
 #include <vector> 
 
@@ -49,3 +51,4 @@ namespace IOHC {
             IOHC::iohcRadio *_radioInstance{};
     };
 }
+#endif // IOHCREMOTE1W_H

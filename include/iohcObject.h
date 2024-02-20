@@ -9,14 +9,13 @@
 
 namespace IOHC {
 //    typedef uint8_t address[3];
-    typedef struct  {
+    struct iohcObject_t {
         address     node;
         uint8_t     actuator[2];
         uint8_t     flags;
         uint8_t     io_manufacturer;
         address     backbone;
-    } iohcObject_t;
-
+    };
 
     class iohcObject {
         public:
@@ -30,6 +29,7 @@ namespace IOHC {
             std::tuple<uint16_t, uint8_t> getTypeSub();
             std::string serialize();
             void dump();
+
         protected:
 
         private:

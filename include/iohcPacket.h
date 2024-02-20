@@ -26,7 +26,6 @@ namespace IOHC {
 
     typedef uint8_t address[3];
 
-
 // Maximum payload in IOHC is 32 bytes: 1 Length byte + 31 body bytes
     struct _header {
         uint8_t         framelength:5;

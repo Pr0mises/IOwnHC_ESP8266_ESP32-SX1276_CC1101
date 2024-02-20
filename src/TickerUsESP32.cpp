@@ -33,7 +33,6 @@
     }
     }
 
-
     // Added as uS
     void TickerUsESP32::_attach_us(uint32_t microseconds, bool repeat, callback_with_arg_t callback, uint32_t arg) {
     esp_timer_create_args_t _timerConfig;

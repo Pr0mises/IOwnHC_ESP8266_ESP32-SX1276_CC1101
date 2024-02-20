@@ -35,8 +35,7 @@ namespace Radio {
         {250, {0x03, 0x01}}     // 232KHz
     };
 
-    void SPI_beginTransaction()
-    {
+    void SPI_beginTransaction() {
         digitalWrite(RADIO_NSS, LOW);
         SPI.beginTransaction(Radio::SpiSettings);
     }
