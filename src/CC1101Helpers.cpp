@@ -1,8 +1,5 @@
-//#include <Arduino.h>                // Is this not required?
-
-#include <CC1101Helpers.h>
 #if defined(CC1101)
-
+#include <CC1101Helpers.h>
 #include <map>
 #if defined(ESP8266)
     #include <TickerUs.h>

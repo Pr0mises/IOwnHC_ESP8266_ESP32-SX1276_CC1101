@@ -1,4 +1,3 @@
-// #pragma once
 #ifndef SX1276HELPERS_H
 #define SX1276HELPERS_H
 

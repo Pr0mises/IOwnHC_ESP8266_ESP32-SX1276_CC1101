@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BOARD_CONFIG_H
+#define BOARD_CONFIG_H
 
 #define SX1276
 //#define CC1101
@@ -55,7 +56,7 @@
     #define RADIO_PREAMBLE_DETECTED                 RADIO_DIO_0     // Preamble detected from Radio (used instead of FIFO empty)
     //#define RADIO_RXCLK                             RADIO_DIO_0     // Radio Rx CLK for serial data sync
     // GDO Serial Clk (0x0B)
-    // GD2 
+    // GD2
 #endif
 
 #define SPI_CLK_FRQ                                 10000000
@@ -78,3 +79,4 @@
     #define LED_BUILTIN                             21
 #endif
 #define RX_LED                                      LED_BUILTIN
+#endif // BOARD_CONFIG_H

@@ -1,4 +1,5 @@
-#include <Arduino.h>                // Is this not required?
+//#include <Arduino.h>                // Is this not required?
+#include <board-config.h>
 
 #if defined(ESP8266)
     #include <ESP8266WiFi.h>
@@ -14,16 +15,15 @@
 
 #include <ESPAsyncWebServer.h>
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration - Async branch
-/*
+
 // Transceivers Helpers defined inside de iohcRadio header
 #if defined(SX1276)
     #include <SX1276Helpers.h>
 #elif defined(CC1101)
     #include <CC1101Helpers.h>
 #endif
-*/
-#include <board-config.h>
-#include <CC1101Helpers.h>
+
+//#include <CC1101Helpers.h>
 #include <user_config.h>
 #include <globals.h>
 #include <WebServerHelpers.h>
@@ -216,7 +216,7 @@ void setup() {
 
     Cmd::init();    // Initialize Serial commands reception and handlers
     Cmd::addHandler((char *)"dump", (char *)"Dump Trasnceiver registers", [](Tokens*cmd)->void {Radio::dump(); Serial.printf("*%d packets in memory\t", nextPacket); Serial.printf("*%d devices discovered\n\n", sysTable->size());});
-    Cmd::addHandler((char *)"dump2", (char *)"Dump Trasnceiver registers 1Col", [](Tokens*cmd)->void {Radio::dump2(); Serial.printf("*%d packets in memory\t", nextPacket); Serial.printf("*%d devices discovered\n\n", sysTable->size());});
+    // Cmd::addHandler((char *)"dump2", (char *)"Dump Trasnceiver registers 1Col", [](Tokens*cmd)->void {Radio::dump2(); Serial.printf("*%d packets in memory\t", nextPacket); Serial.printf("*%d devices discovered\n\n", sysTable->size());});
     Cmd::addHandler((char *)"list", (char *)"List received packets", [](Tokens*cmd)->void {for (uint8_t i=0; i<nextPacket; i++) msgRcvd(radioPackets[i]); sysTable->dump();});
     Cmd::addHandler((char *)"save", (char *)"Saves Objects table", [](Tokens*cmd)->void {sysTable->save(true);});
     Cmd::addHandler((char *)"erase", (char *)"Erase received packets", [](Tokens*cmd)->void {for (uint8_t i=0; i<nextPacket; i++) free(radioPackets[i]); nextPacket = 0;});
