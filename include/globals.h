@@ -2,7 +2,6 @@
   General utility functions
 */
 
-// #pragma once
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
@@ -14,8 +13,6 @@
 #elif defined(ESP32)
   #include <TickerUsESP32.h>
 #endif
-
-//#include <Ticker.h>
 
 #define MAXCMDS 25
 

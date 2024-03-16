@@ -1,5 +1,3 @@
-// #pragma once
-
 //#include <Arduino.h>
 // #include <string>
 #ifndef IOHCREMOTE1W_H

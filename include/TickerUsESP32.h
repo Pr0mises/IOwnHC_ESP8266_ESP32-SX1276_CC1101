@@ -1,4 +1,3 @@
-// #pragma once
 #ifndef TICKERUSESP32_H
 #define TICKERUSESP32_H
 

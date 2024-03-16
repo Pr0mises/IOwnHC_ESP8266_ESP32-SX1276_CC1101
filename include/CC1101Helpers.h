@@ -1,5 +1,3 @@
-#pragma once
-
 #include <cc1101Regs-Fsk.h>
 #include <board-config.h>
 #include <SPI.h>
